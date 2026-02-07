@@ -1,105 +1,47 @@
-# Repository Guidelines
+# AGENTS.md
 
-- Repo: https://github.com/virattt/dexter
-- Dexter is a CLI-based AI agent for deep financial research, built with TypeScript, Ink (React for CLI), and LangChain.
+This file provides guidance to agents when working with code in this repository.
 
-## Project Structure
+## Non-Obvious Project Patterns
 
-- Source code: `src/`
-  - Agent core: `src/agent/` (agent loop, prompts, scratchpad, token counting, types)
-  - CLI interface: `src/cli.tsx` (Ink/React), entry point: `src/index.tsx`
-  - Components: `src/components/` (Ink UI components)
-  - Hooks: `src/hooks/` (React hooks for agent runner, model selection, input history)
-  - Model/LLM: `src/model/llm.ts` (multi-provider LLM abstraction)
-  - Tools: `src/tools/` (financial search, web search, browser, skill tool)
-  - Tool descriptions: `src/tools/descriptions/` (rich descriptions injected into system prompt)
-  - Finance tools: `src/tools/finance/` (prices, fundamentals, filings, insider trades, etc.)
-  - Search tools: `src/tools/search/` (Exa preferred, Tavily fallback)
-  - Browser: `src/tools/browser/` (Playwright-based web scraping)
-  - Skills: `src/skills/` (SKILL.md-based extensible workflows, e.g. DCF valuation)
-  - Utils: `src/utils/` (env, config, caching, token estimation, markdown tables)
-  - Evals: `src/evals/` (LangSmith evaluation runner with Ink UI)
-- Config: `.dexter/settings.json` (persisted model/provider selection)
-- Environment: `.env` (API keys; see `env.example`)
-- Scripts: `scripts/release.sh`
+### Skills System (SKILL.md files)
+- Skills are markdown files with YAML frontmatter (`name`, `description`) in `src/skills/*/SKILL.md`
+- Parsed by `gray-matter` in [`src/skills/loader.ts`](src/skills/loader.ts:16)
+- Each skill can only be invoked **once per query** (enforced in agent logic)
+- Built-in skill: DCF valuation at `src/skills/dcf/SKILL.md`
 
-## Build, Test, and Development Commands
+### Agent Architecture
+- **Scratchpad uses JSONL format** (newline-delimited JSON) for resilient appending - see [`src/agent/scratchpad.ts`](src/agent/scratchpad.ts:74)
+- **Anthropic-style context management**: When context exceeds 100k tokens, oldest results are cleared keeping only 5 most recent - see [`src/utils/tokens.ts`](src/utils/tokens.ts:30)
+- **Agent yields typed events** via AsyncGenerator for real-time UI updates - see [`src/agent/types.ts`](src/agent/types.ts:27)
+- Final answer is generated in a **separate LLM call** with full scratchpad context (no tools bound)
 
-- Runtime: Bun (primary). Use `bun` for all commands.
-- Install deps: `bun install`
-- Run: `bun run start` or `bun run src/index.tsx`
-- Dev (watch mode): `bun run dev`
-- Type-check: `bun run typecheck`
-- Tests: `bun test`
-- Evals: `bun run src/evals/run.ts` (full) or `bun run src/evals/run.ts --sample 10` (sampled)
-- CI runs `bun run typecheck` and `bun test` on push/PR.
+### Tool System
+- **Rich descriptions** stored separately in `src/tools/descriptions/` are injected into system prompt, not tool schema
+- Tools are **conditionally included** based on env vars in [`src/tools/registry.ts`](src/tools/registry.ts:53)
+- `financial_search` is a **meta-tool** that delegates to multiple sub-tools internally
+- Web search prefers Exa, falls back to Tavily (not the other way around)
 
-## Coding Style & Conventions
+### LLM Provider Handling
+- **Provider detection is prefix-based**: `claude-` → Anthropic, `gemini-` → Google, `grok-` → xAI, `ollama:` → Ollama, `openrouter:` → OpenRouter
+- **FAST_MODELS map** in [`src/model/llm.ts`](src/model/llm.ts:19) defines lightweight variants for summarization tasks
+- Anthropic uses explicit `cache_control` on system prompt for cost savings
 
-- Language: TypeScript (ESM, strict mode). JSX via React (Ink for CLI rendering).
-- Prefer strict typing; avoid `any`.
-- Keep files concise; extract helpers rather than duplicating code.
-- Add brief comments for tricky or non-obvious logic.
-- Do not add logging unless explicitly asked.
-- Do not create README or documentation files unless explicitly asked.
+### Cache & Storage
+- Cache files live in `.dexter/cache/` with **human-readable filenames** prefixed by ticker (e.g., `prices/AAPL_a1b2c3d4.json`)
+- Config stored in `.dexter/settings.json` with **model→provider migration logic** for backwards compatibility - see [`src/utils/config.ts`](src/utils/config.ts:7)
+- Scratchpad files persisted to `.dexter/scratchpad/` for debugging
 
-## LLM Providers
+### Testing
+- **Bun's built-in test runner is primary**; Jest config exists only for legacy compatibility
+- Tests are **colocated** as `*.test.ts` (ignore jest.config.js mentioning `__tests__/`)
+- Run single test: `bun test src/utils/cache.test.ts`
 
-- Supported: OpenAI (default), Anthropic, Google, xAI (Grok), OpenRouter, Ollama (local).
-- Default model: `gpt-5.2`. Provider detection is prefix-based (`claude-` -> Anthropic, `gemini-` -> Google, etc.).
-- Fast models for lightweight tasks: see `FAST_MODELS` map in `src/model/llm.ts`.
-- Anthropic uses explicit `cache_control` on system prompt for prompt caching cost savings.
-- Users switch providers/models via `/model` command in the CLI.
+### Version & Release
+- **CalVer format**: `YYYY.M.D` (no zero-padding, e.g., `2026.2.6` not `2026.02.06`)
+- Release script: `bash scripts/release.sh [version]` (defaults to today's date)
 
-## Tools
-
-- `financial_search`: primary tool for all financial data queries (prices, metrics, filings). Delegates to multiple sub-tools internally.
-- `financial_metrics`: direct metric lookups (revenue, market cap, etc.).
-- `read_filings`: SEC filing reader for 10-K, 10-Q, 8-K documents.
-- `web_search`: general web search (Exa if `EXASEARCH_API_KEY` set, else Tavily if `TAVILY_API_KEY` set).
-- `browser`: Playwright-based web scraping for reading pages the agent discovers.
-- `skill`: invokes SKILL.md-defined workflows (e.g. DCF valuation). Each skill runs at most once per query.
-- Tool registry: `src/tools/registry.ts`. Tools are conditionally included based on env vars.
-
-## Skills
-
-- Skills live as `SKILL.md` files with YAML frontmatter (`name`, `description`) and markdown body (instructions).
-- Built-in skills: `src/skills/dcf/SKILL.md`.
-- Discovery: `src/skills/registry.ts` scans for SKILL.md files at startup.
-- Skills are exposed to the LLM as metadata in the system prompt; the LLM invokes them via the `skill` tool.
-
-## Agent Architecture
-
-- Agent loop: `src/agent/agent.ts`. Iterative tool-calling loop with configurable max iterations (default 10).
-- Scratchpad: `src/agent/scratchpad.ts`. Single source of truth for all tool results within a query.
-- Context management: Anthropic-style. Full tool results kept in context; oldest results cleared when token threshold exceeded.
-- Final answer: generated in a separate LLM call with full scratchpad context (no tools bound).
-- Events: agent yields typed events (`tool_start`, `tool_end`, `thinking`, `answer_start`, `done`, etc.) for real-time UI updates.
-
-## Environment Variables
-
-- LLM keys: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY`, `XAI_API_KEY`, `OPENROUTER_API_KEY`
-- Ollama: `OLLAMA_BASE_URL` (default `http://127.0.0.1:11434`)
-- Finance: `FINANCIAL_DATASETS_API_KEY`
-- Search: `EXASEARCH_API_KEY` (preferred), `TAVILY_API_KEY` (fallback)
-- Tracing: `LANGSMITH_API_KEY`, `LANGSMITH_ENDPOINT`, `LANGSMITH_PROJECT`, `LANGSMITH_TRACING`
-- Never commit `.env` files or real API keys.
-
-## Version & Release
-
-- Version format: CalVer `YYYY.M.D` (no zero-padding). Tag prefix: `v`.
-- Release script: `bash scripts/release.sh [version]` (defaults to today's date).
-- Release flow: bump version in `package.json`, create git tag, push tag, create GitHub release via `gh`.
-- Do not push or publish without user confirmation.
-
-## Testing
-
-- Framework: Bun's built-in test runner (primary), Jest config exists for legacy compatibility.
-- Tests colocated as `*.test.ts`.
-- Run `bun test` before pushing when you touch logic.
-
-## Security
-
-- API keys stored in `.env` (gitignored). Users can also enter keys interactively via the CLI.
-- Config stored in `.dexter/settings.json` (gitignored).
-- Never commit or expose real API keys, tokens, or credentials.
+### Code Conventions
+- All file imports use `.js` extension (ESM) even for TypeScript files
+- Tool results formatted via [`formatToolResult()`](src/tools/types.ts) to ensure consistent structure
+- Browser tool uses Playwright's non-standard `_snapshotForAI()` method
