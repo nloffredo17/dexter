@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Box, Text } from 'ink';
 import { colors } from '../theme.js';
-import { formatResponse } from '../utils/markdown-table.js';
+import { formatResponse } from '@dexter/core';
 
 interface AnswerBoxProps {
   stream?: AsyncGenerator<string>;

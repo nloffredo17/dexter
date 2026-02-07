@@ -57,6 +57,7 @@ export {
   DEFAULT_PROVIDER,
   DEFAULT_MODEL,
 } from './model/llm.js';
+export { PROVIDERS, type Provider, type Model } from './model/providers.js';
 
 // Skills
 export { parseSkillFile, loadSkillFromPath, extractSkillMetadata } from './skills/loader.js';
@@ -70,6 +71,8 @@ export {
   getApiKeyNameForProvider,
   getProviderDisplayName,
   checkApiKeyExistsForProvider,
+  saveApiKeyForProvider,
+  saveApiKeyToEnv,
 } from './utils/env.js';
 export { logger } from './utils/logger.js';
 export type { LogEntry, LogLevel } from './utils/logger.js';
@@ -78,3 +81,11 @@ export { extractTextContent, hasToolCalls } from './utils/ai-message.js';
 export { getToolDescription } from './utils/tool-description.js';
 export { InMemoryChatHistory } from './utils/in-memory-chat-history.js';
 export { createProgressChannel } from './utils/progress-channel.js';
+export { getRandomThinkingVerb, THINKING_VERBS } from './utils/thinking-verbs.js';
+export { formatResponse, transformMarkdownTables, parseMarkdownTable, renderBoxTable } from './utils/markdown-table.js';
+export { getOllamaModels } from './utils/ollama.js';
+export { findPrevWordStart, findNextWordEnd } from './utils/text-navigation.js';
+export { cursorHandlers } from './utils/input-key-handlers.js';
+export type { CursorContext } from './utils/input-key-handlers.js';
+export { LongTermChatHistory } from './utils/long-term-chat-history.js';
+export type { ConversationEntry } from './utils/long-term-chat-history.js';

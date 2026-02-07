@@ -1,0 +1,20 @@
+{
+  "name": "@dexter/api",
+  "version": "2026.2.6",
+  "description": "Dexter API Server",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "start": "bun run src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@dexter/core": "workspace:*",
+    "hono": "^4.7.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.7.3"
+  }
+}

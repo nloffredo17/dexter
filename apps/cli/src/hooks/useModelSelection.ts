@@ -1,8 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
-import { getSetting, setSetting, getProviderDisplayName, checkApiKeyExistsForProvider, DEFAULT_MODEL, DEFAULT_PROVIDER, InMemoryChatHistory } from '@dexter/core';
+import { getSetting, setSetting, getProviderDisplayName, checkApiKeyExistsForProvider, DEFAULT_MODEL, DEFAULT_PROVIDER, InMemoryChatHistory, getOllamaModels, saveApiKeyForProvider } from '@dexter/core';
 import { getModelsForProvider, getDefaultModelForProvider, type Model } from '../components/ModelSelector.js';
-import { getOllamaModels } from '../utils/ollama.js';
-import { saveApiKeyForProvider } from '../utils/env.js';
 
 // ============================================================================
 // Types

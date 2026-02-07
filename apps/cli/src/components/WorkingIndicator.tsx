@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Box, Text } from 'ink';
 import Spinner from 'ink-spinner';
 import { colors } from '../theme.js';
-import { getRandomThinkingVerb } from '../utils/thinking-verbs.js';
+import { getRandomThinkingVerb } from '@dexter/core';
 
 /**
  * Renders text with a shine effect that sweeps left-to-right

@@ -102,16 +102,16 @@ dexter/
 - [x] Update imports to use package references
 - [x] Verify CLI still works
 
-### Phase 2: Create API Server
+### Phase 2: Create API Server ✅ COMPLETE (2026-02-07)
 **Goal**: HTTP API with Server-Sent Events for streaming
 
-- [ ] Create `apps/api/` with Hono
-- [ ] Implement `/api/chat` endpoint with SSE streaming
-- [ ] Implement `/api/models` endpoint for model selection
-- [ ] Implement `/api/health` health check
-- [ ] Create API-based agent runner (wraps core agent)
-- [ ] Add CORS support for local dev
-- [ ] Test API with curl/browser
+- [x] Create `apps/api/` with Hono
+- [x] Implement `/api/chat` endpoint with SSE streaming
+- [x] Implement `/api/models` endpoint for model selection
+- [x] Implement `/api/health` health check
+- [x] Create API-based agent runner (wraps core agent)
+- [x] Add CORS support for local dev
+- [x] Test API with curl/browser
 
 ### Phase 3: Create Web Frontend
 **Goal**: React + Vite UI matching CLI functionality
@@ -315,8 +315,13 @@ export function useAgent() {
 - Set up Bun workspaces with Turborepo
 - Verified CLI still works
 
+### Phase 2: Create API Server ✅ COMPLETE (2026-02-07)
+- Created `apps/api/` with Hono and SSE streaming
+- Implemented `/api/chat`, `/api/models`, and `/api/health`
+- Added CORS support and shared model providers with core
+
 ### Next Steps
 
 1. ~~Phase 1~~ ✅ COMPLETE
-2. **Phase 2**: Create API Server (Hono + SSE)
+2. ~~Phase 2~~ ✅ COMPLETE
 3. **Phase 3**: Create Web Frontend (React + Vite)

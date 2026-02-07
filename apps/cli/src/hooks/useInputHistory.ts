@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { LongTermChatHistory } from '../utils/long-term-chat-history.js';
+import { LongTermChatHistory } from '@dexter/core';
 
 export interface UseInputHistoryResult {
   /** Current history value to display (null = user is typing fresh input) */

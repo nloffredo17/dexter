@@ -2,6 +2,12 @@
 
 This file provides guidance to agents when working with code in this repository.
 
+## Napkin (session memory)
+
+- **Read [`.cursor/napkin.md`](.cursor/napkin.md) at the start of every session** before doing anything else. Apply what’s there; don’t announce it.
+- **Update the napkin as you work**: log your own mistakes, user corrections, tool/env surprises, and what worked or didn’t. Keep entries specific and actionable.
+- If `.cursor/napkin.md` is missing, create it with sections: Corrections (table), User Preferences, Patterns That Work, Patterns That Don’t Work, Domain Notes.
+
 ## Non-Obvious Project Patterns
 
 ### Skills System (SKILL.md files)

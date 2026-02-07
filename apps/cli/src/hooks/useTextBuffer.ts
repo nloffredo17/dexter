@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback } from 'react';
-import { findPrevWordStart } from '../utils/text-navigation.js';
+import { findPrevWordStart } from '@dexter/core';
 
 export interface TextBufferActions {
   /** Insert text at the current cursor position */

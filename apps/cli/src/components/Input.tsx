@@ -3,7 +3,7 @@ import { Box, Text, useInput } from 'ink';
 
 import { colors } from '../theme.js';
 import { useTextBuffer } from '../hooks/useTextBuffer.js';
-import { cursorHandlers } from '../utils/input-key-handlers.js';
+import { cursorHandlers } from '@dexter/core';
 import { CursorText } from './CursorText.js';
 
 interface InputProps {
