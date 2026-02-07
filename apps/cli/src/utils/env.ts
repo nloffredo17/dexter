@@ -29,8 +29,14 @@ export function checkApiKeyExists(apiKeyName: string): boolean {
   return false;
 }
 
+/** Strip newlines and control characters to prevent .env injection. */
+function sanitizeApiKeyValue(value: string): string {
+  return value.replace(/[\r\n\x00-\x1f]/g, '').trim();
+}
+
 export function saveApiKeyToEnv(apiKeyName: string, apiKeyValue: string): boolean {
   try {
+    const safeValue = sanitizeApiKeyValue(apiKeyValue);
     let lines: string[] = [];
     let keyUpdated = false;
 
@@ -45,7 +51,7 @@ export function saveApiKeyToEnv(apiKeyName: string, apiKeyValue: string): boolea
         } else if (stripped.includes('=')) {
           const key = stripped.split('=')[0].trim();
           if (key === apiKeyName) {
-            lines.push(`${apiKeyName}=${apiKeyValue}`);
+            lines.push(`${apiKeyName}=${safeValue}`);
             keyUpdated = true;
           } else {
             lines.push(line);
@@ -59,11 +65,11 @@ export function saveApiKeyToEnv(apiKeyName: string, apiKeyValue: string): boolea
         if (lines.length > 0 && !lines[lines.length - 1].endsWith('\n')) {
           lines.push('');
         }
-        lines.push(`${apiKeyName}=${apiKeyValue}`);
+        lines.push(`${apiKeyName}=${safeValue}`);
       }
     } else {
       lines.push('# LLM API Keys');
-      lines.push(`${apiKeyName}=${apiKeyValue}`);
+      lines.push(`${apiKeyName}=${safeValue}`);
     }
 
     writeFileSync('.env', lines.join('\n'));

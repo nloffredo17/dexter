@@ -18,6 +18,8 @@ jobs:
             command: bun run typecheck
           - task: test
             command: bun test
+          - task: audit
+            command: bun run audit
     steps:
       - uses: actions/checkout@v4
 

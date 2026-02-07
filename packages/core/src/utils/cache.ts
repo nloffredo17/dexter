@@ -76,9 +76,14 @@ export function buildCacheKey(
     .replace(/\/$/, '')
     .replace(/\//g, '_');
 
-  // Prefix with ticker when available for human-readable filenames (optional)
-  const ticker = typeof params.ticker === 'string' ? params.ticker.toUpperCase() : null;
-  const prefix = ticker ? `${ticker}_` : '';
+  // Prefix with ticker when available; sanitize to prevent path traversal (only safe chars, no ..)
+  const rawTicker = typeof params.ticker === 'string' ? params.ticker.toUpperCase() : null;
+  let safeTicker =
+    rawTicker != null && rawTicker.length > 0
+      ? rawTicker.replace(/[^A-Z0-9.-]/g, '').slice(0, 20)
+      : null;
+  if (safeTicker?.includes('..') ?? false) safeTicker = null;
+  const prefix = safeTicker ? `${safeTicker}_` : '';
 
   return `${cleanEndpoint}/${prefix}${hash}.json`;
 }

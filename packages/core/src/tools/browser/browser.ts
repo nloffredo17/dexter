@@ -79,6 +79,21 @@ function parseRefsFromSnapshot(snapshot: string): Map<string, { role: string; na
   return refs;
 }
 
+/** Allowed URL protocols for navigate/open to prevent file:, javascript:, etc. */
+const ALLOWED_PROTOCOLS = new Set(['http:', 'https:']);
+
+function isAllowedUrl(urlString: string): { ok: true; url: string } | { ok: false; error: string } {
+  try {
+    const u = new URL(urlString);
+    if (!ALLOWED_PROTOCOLS.has(u.protocol)) {
+      return { ok: false, error: `Only http and https URLs are allowed (got ${u.protocol})` };
+    }
+    return { ok: true, url: urlString };
+  } catch {
+    return { ok: false, error: 'Invalid URL' };
+  }
+}
+
 /**
  * Resolve a ref to a Playwright locator using stored ref data.
  */
@@ -165,9 +180,13 @@ export const browserTool = new DynamicStructuredTool({
           if (!url) {
             return formatToolResult({ error: 'url is required for navigate action' });
           }
+          const urlCheck = isAllowedUrl(url);
+          if (!urlCheck.ok) {
+            return formatToolResult({ error: urlCheck.error });
+          }
           const p = await ensureBrowser();
           // Use networkidle for better JS rendering on dynamic sites
-          await p.goto(url, { timeout: 30000, waitUntil: 'networkidle' });
+          await p.goto(urlCheck.url, { timeout: 30000, waitUntil: 'networkidle' });
           return formatToolResult({
             ok: true,
             url: p.url(),
@@ -180,10 +199,14 @@ export const browserTool = new DynamicStructuredTool({
           if (!url) {
             return formatToolResult({ error: 'url is required for open action' });
           }
+          const openUrlCheck = isAllowedUrl(url);
+          if (!openUrlCheck.ok) {
+            return formatToolResult({ error: openUrlCheck.error });
+          }
           const currentPage = await ensureBrowser();
           const context = currentPage.context();
           const newPage = await context.newPage();
-          await newPage.goto(url, { timeout: 30000, waitUntil: 'networkidle' });
+          await newPage.goto(openUrlCheck.url, { timeout: 30000, waitUntil: 'networkidle' });
           // Switch to the new page
           page = newPage;
           return formatToolResult({

@@ -40,6 +40,13 @@ describe('buildCacheKey', () => {
     const keyB = buildCacheKey('/prices/', { ticker: 'AAPL', start_date: '2024-01-01', end_date: '2024-12-31' });
     expect(keyA).toBe(keyB);
   });
+
+  test('sanitizes ticker to prevent path traversal', () => {
+    const key = buildCacheKey('/prices/', { ticker: '../../../etc/evil', start_date: '2024-01-01' });
+    expect(key).not.toContain('..');
+    expect(key).not.toContain('/etc');
+    expect(key).toMatch(/^prices\/[a-f0-9]+\.json$/); // no ticker prefix when sanitized to empty
+  });
 });
 
 // ---------------------------------------------------------------------------

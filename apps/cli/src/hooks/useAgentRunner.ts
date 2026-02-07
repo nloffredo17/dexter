@@ -3,6 +3,12 @@ import { Agent, InMemoryChatHistory } from '@dexter/core';
 import type { AgentConfig, AgentEvent, DoneEvent } from '@dexter/core';
 import type { HistoryItem, WorkingState } from '../components/index.js';
 
+/** Max run duration (10 min); aborts agent to avoid hung runs. */
+const DEFAULT_RUN_TIMEOUT_MS = 10 * 60 * 1000;
+
+/** Throttle tool_progress state updates to reduce re-renders (ms). */
+const PROGRESS_BATCH_MS = 80;
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -37,7 +43,10 @@ export function useAgentRunner(
   const [error, setError] = useState<string | null>(null);
   
   const abortControllerRef = useRef<AbortController | null>(null);
-  
+  const runTimeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const progressMessageRef = useRef<string | null>(null);
+  const progressFlushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Helper to update the last (processing) history item
   const updateLastHistoryItem = useCallback((
     updater: (item: HistoryItem) => Partial<HistoryItem>
@@ -49,10 +58,27 @@ export function useAgentRunner(
     });
   }, []);
   
-  // Handle agent events
+  // Flush throttled progress message to state
+  const flushProgress = useCallback(() => {
+    if (progressFlushTimerRef.current != null) {
+      clearTimeout(progressFlushTimerRef.current);
+      progressFlushTimerRef.current = null;
+    }
+    const msg = progressMessageRef.current;
+    if (msg == null) return;
+    progressMessageRef.current = null;
+    updateLastHistoryItem(item => ({
+      events: item.events.map(e =>
+        e.id === item.activeToolId ? { ...e, progressMessage: msg } : e
+      ),
+    }));
+  }, [updateLastHistoryItem]);
+
+  // Handle agent events (tool_progress is throttled to reduce re-renders)
   const handleEvent = useCallback((event: AgentEvent) => {
     switch (event.type) {
       case 'thinking':
+        flushProgress();
         setWorkingState({ status: 'thinking' });
         updateLastHistoryItem(item => ({
           events: [...item.events, {
@@ -64,6 +90,7 @@ export function useAgentRunner(
         break;
         
       case 'tool_start': {
+        flushProgress();
         const toolId = `tool-${event.tool}-${Date.now()}`;
         setWorkingState({ status: 'tool', toolName: event.tool });
         updateLastHistoryItem(item => ({
@@ -78,16 +105,14 @@ export function useAgentRunner(
       }
 
       case 'tool_progress':
-        updateLastHistoryItem(item => ({
-          events: item.events.map(e =>
-            e.id === item.activeToolId
-              ? { ...e, progressMessage: event.message }
-              : e
-          ),
-        }));
+        progressMessageRef.current = event.message;
+        if (progressFlushTimerRef.current == null) {
+          progressFlushTimerRef.current = setTimeout(flushProgress, PROGRESS_BATCH_MS);
+        }
         break;
         
       case 'tool_end':
+        flushProgress();
         setWorkingState({ status: 'thinking' });
         updateLastHistoryItem(item => ({
           activeToolId: undefined,
@@ -100,6 +125,7 @@ export function useAgentRunner(
         break;
         
       case 'tool_error':
+        flushProgress();
         setWorkingState({ status: 'thinking' });
         updateLastHistoryItem(item => ({
           activeToolId: undefined,
@@ -112,10 +138,12 @@ export function useAgentRunner(
         break;
         
       case 'answer_start':
+        flushProgress();
         setWorkingState({ status: 'answering', startTime: Date.now() });
         break;
         
       case 'done': {
+        flushProgress();
         const doneEvent = event as DoneEvent;
         updateLastHistoryItem(item => {
           // Update answer in chat history for multi-turn context
@@ -136,14 +164,17 @@ export function useAgentRunner(
         break;
       }
     }
-  }, [updateLastHistoryItem, inMemoryChatHistoryRef]);
-  
+  }, [updateLastHistoryItem, inMemoryChatHistoryRef, flushProgress]);
+
   // Run a query through the agent
   const runQuery = useCallback(async (query: string): Promise<RunQueryResult | undefined> => {
-    // Create abort controller for this execution
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
-    
+
+    runTimeoutIdRef.current = setTimeout(() => {
+      abortController.abort();
+    }, DEFAULT_RUN_TIMEOUT_MS);
+
     // Track the final answer to return
     let finalAnswer: string | undefined;
     
@@ -207,17 +238,28 @@ export function useAgentRunner(
       setWorkingState({ status: 'idle' });
       return undefined;
     } finally {
+      if (runTimeoutIdRef.current != null) {
+        clearTimeout(runTimeoutIdRef.current);
+        runTimeoutIdRef.current = null;
+      }
       abortControllerRef.current = null;
     }
   }, [agentConfig, inMemoryChatHistoryRef, handleEvent]);
   
   // Cancel the current execution
   const cancelExecution = useCallback(() => {
+    if (progressFlushTimerRef.current != null) {
+      clearTimeout(progressFlushTimerRef.current);
+      progressFlushTimerRef.current = null;
+    }
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
     }
-    
+    if (runTimeoutIdRef.current != null) {
+      clearTimeout(runTimeoutIdRef.current);
+      runTimeoutIdRef.current = null;
+    }
     // Mark current processing item as interrupted
     setHistory(prev => {
       const last = prev[prev.length - 1];
