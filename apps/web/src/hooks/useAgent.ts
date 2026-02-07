@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { streamChat, type AgentEvent, type ChatRequest } from '../api/client';
+import { streamChat, type AgentEvent, type ChatRequest, type Message as ApiMessage } from '../api/client.js';
 
 export interface Message {
   id: string;
@@ -13,6 +13,20 @@ export interface Message {
 export function useAgent() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+
+  // Load messages from a session
+  const loadSessionMessages = useCallback((apiMessages: ApiMessage[]) => {
+    const convertedMessages: Message[] = apiMessages.map(msg => ({
+      id: msg.id,
+      role: msg.role,
+      content: msg.content,
+      events: [],
+      status: 'completed' as const,
+      timestamp: new Date(msg.created_at).getTime(),
+    }));
+    setMessages(convertedMessages);
+  }, []);
 
   const sendMessage = useCallback(
     async (query: string, options: Partial<ChatRequest> = {}) => {
@@ -46,6 +60,13 @@ export function useAgent() {
           ...options,
           conversationId: assistantId,
         })) {
+          // Handle session event from API
+          if (event.type === 'session' && 'sessionId' in event) {
+            const sessionEvent = event as { sessionId: string };
+            setCurrentSessionId(sessionEvent.sessionId);
+            continue;
+          }
+
           setMessages((prev) =>
             prev.map((msg) => {
               if (msg.id !== assistantId) return msg;
@@ -98,7 +119,17 @@ export function useAgent() {
     [isStreaming],
   );
 
-  const clearMessages = useCallback(() => setMessages([]), []);
+  const clearMessages = useCallback(() => {
+    setMessages([]);
+    setCurrentSessionId(null);
+  }, []);
 
-  return { messages, isStreaming, sendMessage, clearMessages };
+  return { 
+    messages, 
+    isStreaming, 
+    currentSessionId,
+    sendMessage, 
+    loadSessionMessages,
+    clearMessages,
+  };
 }

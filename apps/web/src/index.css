@@ -89,3 +89,50 @@ body::before {
   background-repeat: repeat;
   background-size: 256px 256px;
 }
+
+/* Markdown content styles */
+.markdown-content {
+  /* Ensure code blocks use monospace */
+  code,
+  pre {
+    font-family: var(--font-mono);
+  }
+
+  /* Smooth scrolling for overflow content */
+  pre {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+
+  pre::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  pre::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  pre::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 2px;
+  }
+
+  /* Nested list spacing */
+  ul ul,
+  ol ol,
+  ul ol,
+  ol ul {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  /* First child no top margin */
+  > *:first-child {
+    margin-top: 0;
+  }
+
+  /* Last child no bottom margin */
+  > *:last-child {
+    margin-bottom: 0;
+  }
+}

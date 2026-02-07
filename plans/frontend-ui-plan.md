@@ -113,18 +113,18 @@ dexter/
 - [x] Add CORS support for local dev
 - [x] Test API with curl/browser
 
-### Phase 3: Create Web Frontend
+### Phase 3: Create Web Frontend ✅ COMPLETE (2026-02-07)
 **Goal**: React + Vite UI matching CLI functionality
 
-- [ ] Create `apps/web/` with Vite + React + TypeScript
-- [ ] Set up shadcn/ui or similar component library
-- [ ] Create API client for backend communication
-- [ ] Build chat interface with message history
-- [ ] Build real-time event viewer (tool calls, thinking)
-- [ ] Add model selector UI
-- [ ] Add sidebar for conversation history
-- [ ] Implement streaming message display
-- [ ] Add dark/light mode support
+- [x] Create `apps/web/` with Vite + React + TypeScript
+- [x] Set up shadcn/ui or similar component library
+- [x] Create API client for backend communication
+- [x] Build chat interface with message history
+- [x] Build real-time event viewer (tool calls, thinking)
+- [x] Add model selector UI
+- [x] Add sidebar for conversation history
+- [x] Implement streaming message display
+- [x] Add dark/light mode support
 
 ### Phase 4: Polish & Integration
 **Goal**: Production-ready setup
@@ -320,8 +320,17 @@ export function useAgent() {
 - Implemented `/api/chat`, `/api/models`, and `/api/health`
 - Added CORS support and shared model providers with core
 
+### Phase 3: Create Web Frontend ✅ COMPLETE (2026-02-07)
+- Created `apps/web/` with Vite + React + TypeScript
+- Built chat interface with [`ChatInterface.tsx`](apps/web/src/components/Chat/ChatInterface.tsx), [`MessageBubble.tsx`](apps/web/src/components/Chat/MessageBubble.tsx)
+- Added event viewer with [`EventLog.tsx`](apps/web/src/components/Chat/EventLog.tsx)
+- Implemented model selector with [`ModelSelector.tsx`](apps/web/src/components/Chat/ModelSelector.tsx)
+- Added sidebar with [`Sidebar.tsx`](apps/web/src/components/Sidebar/Sidebar.tsx)
+- Created API client in [`client.ts`](apps/web/src/api/client.ts) and hook in [`useAgent.ts`](apps/web/src/hooks/useAgent.ts)
+
 ### Next Steps
 
 1. ~~Phase 1~~ ✅ COMPLETE
 2. ~~Phase 2~~ ✅ COMPLETE
-3. **Phase 3**: Create Web Frontend (React + Vite)
+3. ~~Phase 3~~ ✅ COMPLETE
+4. **Phase 4**: Polish & Integration

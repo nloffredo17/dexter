@@ -1,19 +1,56 @@
-import { Plus, History, Settings, Database, Shield, BarChart3 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { cn } from '@/utils/cn';
+import { useState } from 'react';
+import { Plus, History, Settings, Database, Shield, BarChart3, Trash2, MoreVertical } from 'lucide-react';
+import { Button } from '@/components/ui/Button.js';
+import { cn } from '@/utils/cn.js';
+import type { Session } from '@/api/client.js';
 
 interface Props {
+  sessions: Session[];
+  currentSessionId: string | null;
   onNewChat: () => void;
+  onSelectSession: (id: string) => void;
+  onDeleteSession: (id: string) => void;
+  isLoading?: boolean;
 }
 
-const demoSessions = [
-  'AAPL Revenue Analysis',
-  'NVDA Market Cap Forecast',
-  'Fed Interest Rate Impact',
-  'Crypto Liquidity Report',
-];
+export function Sidebar({ 
+  sessions, 
+  currentSessionId, 
+  onNewChat, 
+  onSelectSession, 
+  onDeleteSession,
+  isLoading 
+}: Props) {
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-export function Sidebar({ onNewChat }: Props) {
+  const handleDelete = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (deleteConfirmId === id) {
+      onDeleteSession(id);
+      setDeleteConfirmId(null);
+    } else {
+      setDeleteConfirmId(id);
+      // Reset confirmation after 3 seconds
+      setTimeout(() => setDeleteConfirmId(prev => prev === id ? null : prev), 3000);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else if (diffDays < 7) {
+      return date.toLocaleDateString([], { weekday: 'short' });
+    } else {
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+  };
+
   return (
     <aside className="w-56 border-r border-[var(--color-border)] bg-[var(--color-surface)] flex flex-col shrink-0 relative z-10">
       {/* New chat button */}
@@ -34,29 +71,62 @@ export function Sidebar({ onNewChat }: Props) {
           Recent Sessions
         </div>
 
-        {demoSessions.map((session, i) => (
-          <button
-            key={i}
-            className={cn(
-              'w-full text-left px-3 py-2 text-[12px] uppercase tracking-wider transition-colors',
-              i === 0
-                ? 'bg-[var(--color-surface-raised)] text-[var(--color-accent)] border-l-2 border-[var(--color-accent)]'
-                : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-foreground)]',
-            )}
-          >
-            <div className="flex items-center gap-2">
-              <History
-                size={10}
-                className={
-                  i === 0
-                    ? 'text-[var(--color-accent)]'
-                    : 'text-[var(--color-text-dim)]'
-                }
-              />
-              <span className="truncate">{session}</span>
+        {isLoading && sessions.length === 0 ? (
+          <div className="px-3 py-4 text-[12px] text-[var(--color-text-dim)] text-center">
+            Loading sessions...
+          </div>
+        ) : sessions.length === 0 ? (
+          <div className="px-3 py-4 text-[12px] text-[var(--color-text-dim)] text-center">
+            No sessions yet.
+            <br />
+            Start a new chat!
+          </div>
+        ) : (
+          sessions.map((session) => (
+            <div
+              key={session.id}
+              onClick={() => onSelectSession(session.id)}
+              className={cn(
+                'group w-full text-left px-3 py-2 text-[12px] transition-colors cursor-pointer relative',
+                session.id === currentSessionId
+                  ? 'bg-[var(--color-surface-raised)] text-[var(--color-accent)] border-l-2 border-[var(--color-accent)]'
+                  : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-foreground)] border-l-2 border-transparent'
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <History
+                  size={10}
+                  className={
+                    session.id === currentSessionId
+                      ? 'text-[var(--color-accent)]'
+                      : 'text-[var(--color-text-dim)]'
+                  }
+                />
+                <span className="truncate flex-1">{session.title}</span>
+              </div>
+              
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-[10px] text-[var(--color-text-dim)]">
+                  {formatDate(session.updated_at)}
+                </span>
+                
+                {/* Delete button - visible on hover or when confirming */}
+                <button
+                  onClick={(e) => handleDelete(session.id, e)}
+                  className={cn(
+                    'p-1 rounded transition-all',
+                    deleteConfirmId === session.id
+                      ? 'bg-red-500/20 text-red-400 opacity-100'
+                      : 'opacity-0 group-hover:opacity-100 text-[var(--color-text-dim)] hover:text-red-400'
+                  )}
+                  title={deleteConfirmId === session.id ? 'Click again to confirm' : 'Delete session'}
+                >
+                  <Trash2 size={10} />
+                </button>
+              </div>
             </div>
-          </button>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Footer */}

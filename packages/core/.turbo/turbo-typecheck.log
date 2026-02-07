@@ -1,0 +1,18 @@
+$ tsc --noEmit
+src/utils/ollama.test.ts(18,5): error TS2741: Property 'preconnect' is missing in type '() => Promise<never>' but required in type 'typeof fetch'.
+src/utils/ollama.test.ts(27,5): error TS2741: Property 'preconnect' is missing in type '() => Promise<Response>' but required in type 'typeof fetch'.
+src/utils/ollama.test.ts(36,5): error TS2741: Property 'preconnect' is missing in type '() => Promise<Response>' but required in type 'typeof fetch'.
+src/utils/ollama.test.ts(53,5): error TS2741: Property 'preconnect' is missing in type '() => Promise<Response>' but required in type 'typeof fetch'.
+src/utils/ollama.test.ts(73,5): error TS2741: Property 'preconnect' is missing in type '() => Promise<Response>' but required in type 'typeof fetch'.
+src/utils/ollama.test.ts(85,5): error TS2741: Property 'preconnect' is missing in type '(url: RequestInfo | URL) => Promise<Response>' but required in type 'typeof fetch'.
+src/utils/ollama.test.ts(97,5): error TS2741: Property 'preconnect' is missing in type '(url: RequestInfo | URL) => Promise<Response>' but required in type 'typeof fetch'.
+src/utils/thinking-verbs.test.ts(32,38): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(expected: "Alchemizing" | "Ambling" | "Baking" | "Boogieing" | "Brainstorming" | "Brewing" | "Buffering" | "Buzzing" | "Cerebrating" | "Chugging" | "Chugging along" | "Churning" | ... 78 more ... | "Zooming"): void', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type '"Alchemizing" | "Ambling" | "Baking" | "Boogieing" | "Brainstorming" | "Brewing" | "Buffering" | "Buzzing" | "Cerebrating" | "Chugging" | "Chugging along" | "Churning" | "Clauding" | ... 77 more ... | "Zooming"'.
+  Overload 2 of 2, '(expected: "Alchemizing" | "Ambling" | "Baking" | "Boogieing" | "Brainstorming" | "Brewing" | "Buffering" | "Buzzing" | "Cerebrating" | "Chugging" | "Chugging along" | "Churning" | ... 78 more ... | "Zooming"): void', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type '"Alchemizing" | "Ambling" | "Baking" | "Boogieing" | "Brainstorming" | "Brewing" | "Buffering" | "Buzzing" | "Cerebrating" | "Chugging" | "Chugging along" | "Churning" | "Clauding" | ... 77 more ... | "Zooming"'.
+src/utils/thinking-verbs.test.ts(48,40): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(expected: "Alchemizing" | "Ambling" | "Baking" | "Boogieing" | "Brainstorming" | "Brewing" | "Buffering" | "Buzzing" | "Cerebrating" | "Chugging" | "Chugging along" | "Churning" | ... 78 more ... | "Zooming"): void', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type '"Alchemizing" | "Ambling" | "Baking" | "Boogieing" | "Brainstorming" | "Brewing" | "Buffering" | "Buzzing" | "Cerebrating" | "Chugging" | "Chugging along" | "Churning" | "Clauding" | ... 77 more ... | "Zooming"'.
+  Overload 2 of 2, '(expected: "Alchemizing" | "Ambling" | "Baking" | "Boogieing" | "Brainstorming" | "Brewing" | "Buffering" | "Buzzing" | "Cerebrating" | "Chugging" | "Chugging along" | "Churning" | ... 78 more ... | "Zooming"): void', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type '"Alchemizing" | "Ambling" | "Baking" | "Boogieing" | "Brainstorming" | "Brewing" | "Buffering" | "Buzzing" | "Cerebrating" | "Chugging" | "Chugging along" | "Churning" | "Clauding" | ... 77 more ... | "Zooming"'.

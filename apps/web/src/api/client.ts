@@ -3,9 +3,33 @@ export interface ChatRequest {
   model?: string;
   provider?: string;
   conversationId?: string;
+  sessionId?: string;
+}
+
+export interface Session {
+  id: string;
+  title: string;
+  model: string | null;
+  provider: string | null;
+  created_at: string;
+  updated_at: string;
+  messageCount: number;
+}
+
+export interface SessionWithMessages extends Session {
+  messages: Message[];
+}
+
+export interface Message {
+  id: string;
+  session_id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  created_at: string;
 }
 
 export type AgentEventType =
+  | 'session'
   | 'thinking'
   | 'tool_start'
   | 'tool_end'
@@ -80,4 +104,49 @@ export async function fetchModels(): Promise<Provider[]> {
   if (!res.ok) throw new Error('Failed to fetch models');
   const data = await res.json();
   return Array.isArray(data.providers) ? data.providers : [];
+}
+
+// Session API
+
+export async function fetchSessions(): Promise<Session[]> {
+  const res = await fetch('/api/sessions');
+  if (!res.ok) throw new Error('Failed to fetch sessions');
+  const data = await res.json();
+  return Array.isArray(data.sessions) ? data.sessions : [];
+}
+
+export async function createSession(title: string, model?: string, provider?: string): Promise<Session> {
+  const res = await fetch('/api/sessions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, model, provider }),
+  });
+  if (!res.ok) throw new Error('Failed to create session');
+  const data = await res.json();
+  return data.session;
+}
+
+export async function fetchSession(id: string): Promise<SessionWithMessages> {
+  const res = await fetch(`/api/sessions/${id}`);
+  if (!res.ok) throw new Error('Failed to fetch session');
+  const data = await res.json();
+  return data.session;
+}
+
+export async function updateSession(id: string, updates: { title?: string }): Promise<Session> {
+  const res = await fetch(`/api/sessions/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates),
+  });
+  if (!res.ok) throw new Error('Failed to update session');
+  const data = await res.json();
+  return data.session;
+}
+
+export async function deleteSession(id: string): Promise<void> {
+  const res = await fetch(`/api/sessions/${id}`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) throw new Error('Failed to delete session');
 }

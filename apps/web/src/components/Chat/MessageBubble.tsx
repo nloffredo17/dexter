@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { User, Bot, AlertCircle } from 'lucide-react';
 import type { Message } from '@/hooks/useAgent';
 import { EventLog } from './EventLog';
+import { MarkdownContent } from './MarkdownContent';
 import { cn } from '@/utils/cn';
 
 interface Props {
@@ -63,7 +64,11 @@ export function MessageBubble({ message }: Props) {
 
         {/* Content */}
         {message.content ? (
-          <div className="whitespace-pre-wrap">{message.content}</div>
+          isUser ? (
+            <div className="whitespace-pre-wrap">{message.content}</div>
+          ) : (
+            <MarkdownContent content={message.content} />
+          )
         ) : message.status === 'pending' || message.status === 'streaming' ? (
           <div className="flex items-center gap-1.5">
             <span className="inline-block w-[3px] h-4 bg-[var(--color-accent)] animate-blink" />

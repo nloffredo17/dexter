@@ -1,14 +1,26 @@
 import { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Send, Terminal, Activity, Zap } from 'lucide-react';
-import { useAgent } from '@/hooks/useAgent';
-import { MessageBubble } from './MessageBubble';
-import { ModelSelector } from './ModelSelector';
-import { Button } from '@/components/ui/Button';
-import { cn } from '@/utils/cn';
+import { MessageBubble } from './MessageBubble.js';
+import { ModelSelector } from './ModelSelector.js';
+import { Button } from '@/components/ui/Button.js';
+import { cn } from '@/utils/cn.js';
+import type { Message } from '@/hooks/useAgent.js';
+import type { ChatRequest } from '@/api/client.js';
 
-export function ChatInterface() {
-  const { messages, isStreaming, sendMessage } = useAgent();
+interface ChatInterfaceProps {
+  messages: Message[];
+  isStreaming: boolean;
+  currentSessionId: string | null;
+  onSendMessage: (query: string, options?: Partial<ChatRequest>) => Promise<void>;
+}
+
+export function ChatInterface({ 
+  messages, 
+  isStreaming, 
+  currentSessionId,
+  onSendMessage 
+}: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [selectedModel, setSelectedModel] = useState({
     model: 'gpt-5.2',
@@ -36,9 +48,10 @@ export function ChatInterface() {
     e.preventDefault();
     const trimmed = input.trim();
     if (!trimmed || isStreaming) return;
-    sendMessage(trimmed, {
+    onSendMessage(trimmed, {
       model: selectedModel.model,
       provider: selectedModel.provider,
+      sessionId: currentSessionId ?? undefined,
     });
     setInput('');
   };
