@@ -18,6 +18,7 @@
     "audit": "bun audit",
     "cli": "bun run apps/cli/src/index.tsx",
     "api": "bun run apps/api/src/index.ts",
+    "web": "bun run --cwd apps/web dev",
     "postinstall": "playwright install chromium"
   },
   "devDependencies": {
