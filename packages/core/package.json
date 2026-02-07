@@ -1,0 +1,58 @@
+{
+  "name": "@dexter/core",
+  "version": "2026.2.6",
+  "description": "Dexter core agent logic and tools",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./agent": {
+      "import": "./dist/agent/index.js",
+      "types": "./dist/agent/index.d.ts"
+    },
+    "./tools": {
+      "import": "./dist/tools/index.js",
+      "types": "./dist/tools/index.d.ts"
+    },
+    "./model": {
+      "import": "./dist/model/llm.js",
+      "types": "./dist/model/llm.d.ts"
+    },
+    "./skills": {
+      "import": "./dist/skills/index.js",
+      "types": "./dist/skills/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@langchain/anthropic": "^1.1.3",
+    "@langchain/core": "^1.1.0",
+    "@langchain/exa": "^1.0.1",
+    "@langchain/google-genai": "^2.0.0",
+    "@langchain/ollama": "^1.0.3",
+    "@langchain/openai": "^1.1.3",
+    "@langchain/tavily": "^1.0.1",
+    "dotenv": "^17.2.3",
+    "exa-js": "^2.2.0",
+    "gray-matter": "^4.0.3",
+    "langsmith": "^0.4.10",
+    "playwright": "^1.52.0",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.9.3"
+  }
+}

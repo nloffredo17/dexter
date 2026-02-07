@@ -91,16 +91,16 @@ dexter/
 ## Implementation Phases
 
 ### Phase 1: Extract Shared Core
-**Goal**: Move agent logic into a shared package
+**Goal**: Move agent logic into a shared package ✅ COMPLETE
 
-- [ ] Create `packages/core/` package
-- [ ] Move `src/agent/` → `packages/core/src/agent/`
-- [ ] Move `src/tools/` → `packages/core/src/tools/`
-- [ ] Move `src/model/` → `packages/core/src/model/`
-- [ ] Move `src/skills/` → `packages/core/src/skills/`
-- [ ] Extract shared utilities
-- [ ] Update imports to use package references
-- [ ] Verify CLI still works
+- [x] Create `packages/core/` package
+- [x] Move `src/agent/` → `packages/core/src/agent/`
+- [x] Move `src/tools/` → `packages/core/src/tools/`
+- [x] Move `src/model/` → `packages/core/src/model/`
+- [x] Move `src/skills/` → `packages/core/src/skills/`
+- [x] Extract shared utilities
+- [x] Update imports to use package references
+- [x] Verify CLI still works
 
 ### Phase 2: Create API Server
 **Goal**: HTTP API with Server-Sent Events for streaming
@@ -307,8 +307,16 @@ export function useAgent() {
 }
 ```
 
-## Next Steps
+## Progress
 
-1. Review this plan and provide feedback
-2. Decide on Phase 1 start (extract shared core)
-3. Switch to Code mode to begin implementation
+### Phase 1: Extract Shared Core ✅ COMPLETE (2026-02-07)
+- Created `packages/core/` with all agent logic
+- Moved CLI to `apps/cli/`
+- Set up Bun workspaces with Turborepo
+- Verified CLI still works
+
+### Next Steps
+
+1. ~~Phase 1~~ ✅ COMPLETE
+2. **Phase 2**: Create API Server (Hono + SSE)
+3. **Phase 3**: Create Web Frontend (React + Vite)
